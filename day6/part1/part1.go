@@ -57,7 +57,6 @@ func main() {
 
 func ParseLine(line string) (string, int, int, int, int) {
 	action, start, end := "", "", ""
-	startRow, startCol, endRow, endCol := 0, 0, 0, 0
 	atoms := strings.Split(line, " ")
 
 	if strings.Contains(line, "toggle") {
@@ -78,6 +77,5 @@ func ParseLine(line string) (string, int, int, int, int) {
 	er, _ := strconv.ParseInt(atoms[0], 10, 32)
 	ec, _ := strconv.ParseInt(atoms[1], 10, 32)
 
-	startRow, startCol, endRow, endCol = int(sr), int(sc), int(er), int(ec)
-	return action, startRow, startCol, endRow, endCol
+	return action, int(sr), int(sc), int(er), int(ec)
 }
