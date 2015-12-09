@@ -46,7 +46,7 @@ func main() {
 	lightsOn := 0
 	for row, _ := range grid {
 		for col, _ := range grid[row] {
-			if grid[row][col] == true {
+			if grid[row][col] {
 				lightsOn++
 			}
 		}
