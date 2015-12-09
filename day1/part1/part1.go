@@ -12,19 +12,17 @@ func main() {
 
 	s := bufio.NewScanner(f)
 
-	var floor int
-	var instructions []byte
+	floor := 0
 
 	for s.Scan() {
-		instructions = append(instructions, s.Bytes()...)
-	}
-
-	for i := 0; i < len(instructions); i++ {
-		if string(instructions[i]) == "(" {
-			floor++
-		}
-		if string(instructions[i]) == ")" {
-			floor--
+		line := s.Bytes()
+		for i := 0; i < len(line); i++ {
+			if string(line[i]) == "(" {
+				floor++
+			}
+			if string(line[i]) == ")" {
+				floor--
+			}
 		}
 	}
 
