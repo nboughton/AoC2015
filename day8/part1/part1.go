@@ -16,16 +16,13 @@ func main() {
 
 	s := bufio.NewScanner(f)
 
-	totalChars := 0
-	totalMem := 0
+	result := 0
 	for s.Scan() {
 		line := s.Text()
-		totalChars += len([]byte(line))
-		totalMem += getMem(line)
-		fmt.Printf("c: %v, m: %v\n", len([]byte(line)), getMem(line))
+		result += len([]byte(line)) - getMem(line)
 	}
 
-	fmt.Printf("%v\n", totalChars-totalMem)
+	fmt.Printf("%v\n", result)
 }
 
 func getMem(s string) int {
