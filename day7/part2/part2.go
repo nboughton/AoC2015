@@ -15,6 +15,11 @@ import (
 var mostOps = regexp.MustCompile(`(AND|OR|RSHIFT|LSHIFT)`)
 var isInt = regexp.MustCompile(`^[0-9]+$`)
 
+type Override struct {
+	id  string
+	sig uint16
+}
+
 type Wire struct {
 	sig      uint16
 	op       string
@@ -37,7 +42,13 @@ func main() {
 	c.ReadInput(f)
 
 	// Evaluate wire "a"
-	fmt.Printf("a: %v\n", c.GetSignal("a"))
+	o := &Override{id: "b", sig: c.GetSignal("a")}
+	d := NewCircuit()
+	f, _ = os.Open(os.Args[1])
+	defer f.Close()
+	d.ReadInput(f, o)
+
+	fmt.Printf("a: %v\n", d.GetSignal("a"))
 }
 
 func NewCircuit() *Circuit {
@@ -46,7 +57,7 @@ func NewCircuit() *Circuit {
 	return c
 }
 
-func (c *Circuit) ReadInput(file *os.File) {
+func (c *Circuit) ReadInput(file *os.File, o ...*Override) {
 	s := bufio.NewScanner(file)
 	for s.Scan() {
 		// Declare a new wire to be added to circuit plan
@@ -73,6 +84,13 @@ func (c *Circuit) ReadInput(file *os.File) {
 			w.gateArgs = append(w.gateArgs, l[1])
 		}
 
+		// Override values if we want to
+		for _, override := range o {
+			if override.id == id {
+				w.sig = override.sig
+				w.gateArgs = nil
+			}
+		}
 		// Assign the parsed wire to the circuit plan
 		c.plan[id] = w
 	}
