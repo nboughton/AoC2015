@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"strings"
 )
 
-var hex = regexp.MustCompile(`\\x[a-z0-9]{2}`)
-var dbs = regexp.MustCompile(`\\[\\"]{1}`)
+var ptrn = regexp.MustCompile(`\\(x[a-z0-9]{2}|[\\"]{1})`)
 
 func main() {
 	f, _ := os.Open(os.Args[1])
@@ -26,9 +26,17 @@ func main() {
 }
 
 func getMem(s string) int {
-	mem := len([]byte(s)) - 2
-	mem -= len(hex.FindAllString(s, -1)) * 3
-	mem -= len(dbs.FindAllString(s, -1))
+	trim := string([]byte(s)[1 : len(s)-1])
+	mem := len(trim)
+
+	m := ptrn.FindAllString(trim, -1)
+	for i := 0; i < len(m); i++ {
+		if strings.Contains(m[i], "x") {
+			mem -= 3
+		} else {
+			mem--
+		}
+	}
 
 	return mem
 }
