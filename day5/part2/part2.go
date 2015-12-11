@@ -7,8 +7,8 @@ import (
 	"os"
 )
 
-var RepeatLetter = pcre.MustCompile(`([a-z]{1})[a-z]{1}\1`, 0)
-var RepeatingDoubleLetters = pcre.MustCompile(`([a-z]{2}).*\1`, 0)
+var repeatLetter = pcre.MustCompile(`([a-z]{1})[a-z]{1}\1`, 0)
+var repeatingDoubleLetters = pcre.MustCompile(`([a-z]{2}).*\1`, 0)
 
 func main() {
 	f, _ := os.Open(os.Args[1])
@@ -19,8 +19,8 @@ func main() {
 	nice := 0
 	for s.Scan() {
 		str := s.Text()
-		rl := RepeatLetter.MatcherString(str, 0)
-		rdl := RepeatingDoubleLetters.MatcherString(str, 0)
+		rl := repeatLetter.MatcherString(str, 0)
+		rdl := repeatingDoubleLetters.MatcherString(str, 0)
 
 		if rl.Matches() && rdl.Matches() {
 			nice++

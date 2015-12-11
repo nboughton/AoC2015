@@ -39,8 +39,8 @@ func main() {
 	}
 
 	houses := 0
-	for r, _ := range grid {
-		for _, _ = range grid[r] {
+	for r := range grid {
+		for _ = range grid[r] {
 			houses++
 		}
 	}

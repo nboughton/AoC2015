@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-type Santa struct {
+type santa struct {
 	row, col int // All a Santa has to know is where he is
 }
 
@@ -16,12 +16,12 @@ func main() {
 
 	s := bufio.NewScanner(f)
 
-	// with a santas array and a selector we can easily swap
+	// with a santas array and a sel we can easily swap
 	// between them while we iterate the instructions
-	santa := &Santa{row: 0, col: 0}
-	robot := &Santa{row: 0, col: 0}
-	santas := []Santa{*santa, *robot}
-	selector := 0
+	sta := &santa{row: 0, col: 0}
+	rbt := &santa{row: 0, col: 0}
+	santas := []santa{*sta, *rbt}
+	sel := 0
 
 	grid := make(map[int]map[int]int)
 	row, col := 0, 0
@@ -30,23 +30,23 @@ func main() {
 		line := s.Bytes()
 		for i := 0; i < len(line); i++ {
 			if i%2 == 0 {
-				selector = 0
+				sel = 0
 			} else {
-				selector = 1
+				sel = 1
 			}
 
 			switch string(line[i]) {
 			case "^":
-				santas[selector].row++
+				santas[sel].row++
 			case "v":
-				santas[selector].row--
+				santas[sel].row--
 			case ">":
-				santas[selector].col++
+				santas[sel].col++
 			case "<":
-				santas[selector].col--
+				santas[sel].col--
 			}
 
-			row, col = santas[selector].row, santas[selector].col
+			row, col = santas[sel].row, santas[sel].col
 			_, ok := grid[row]
 			if !ok {
 				grid[row] = make(map[int]int)
@@ -57,8 +57,8 @@ func main() {
 	}
 
 	houses := 0
-	for r, _ := range grid {
-		for _, _ = range grid[r] {
+	for r := range grid {
+		for _ = range grid[r] {
 			houses++
 		}
 	}

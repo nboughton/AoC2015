@@ -23,7 +23,7 @@ func main() {
 
 	for s.Scan() {
 		line := s.Text()
-		action, startRow, startCol, endRow, endCol := ParseLine(line)
+		action, startRow, startCol, endRow, endCol := parseLine(line)
 
 		for row := startRow; row <= endRow; row++ {
 			for col := startCol; col <= endCol; col++ {
@@ -44,8 +44,8 @@ func main() {
 	}
 
 	lightsOn := 0
-	for row, _ := range grid {
-		for col, _ := range grid[row] {
+	for row := range grid {
+		for col := range grid[row] {
 			if grid[row][col] {
 				lightsOn++
 			}
@@ -55,7 +55,7 @@ func main() {
 	fmt.Printf("%v lights are turned on\n", lightsOn)
 }
 
-func ParseLine(line string) (string, int, int, int, int) {
+func parseLine(line string) (string, int, int, int, int) {
 	action, start, end := "", "", ""
 	atoms := strings.Split(line, " ")
 
