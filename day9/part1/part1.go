@@ -15,9 +15,9 @@ func main() {
 	s := bufio.NewScanner(f)
 
 	distances := make(map[string]map[string]int)
-
+	places := []string{}
 	for s.Scan() {
-		from, to, distance := ParseLine(s.Text())
+		from, to, distance := parseLine(s.Text())
 
 		_, ok := distances[from]
 		if !ok {
@@ -27,24 +27,22 @@ func main() {
 		distances[from][to] = distance
 	}
 
-	/*
-		distance := 1000 // Anything will be shorter than this
-		for from, _ := range distances {
-			for to, _ := range distances[from] {
-				for dest, _ := range distances[to] {
-					d := distances[from][to] + distances[to][dest]
-					fmt.Printf("%v -> %v -> %v: %v\n", from, to, dest, d)
-					if d < distance {
-						distance = d
-					}
-				}
-			}
-		}
-	*/
-	fmt.Printf("The shortest route is %v\n")
+	fmt.Printf("places %v\n")
 }
 
-func ParseLine(s string) (string, string, int) {
+func addPlace(p string, places *[]string) {
+	for i := 0; i < len(*places); i++ {
+
+	}
+}
+
+func tryPath(start, end string, d map[string]map[string]int) int {
+	//path := start
+
+	return 0
+}
+
+func parseLine(s string) (string, string, int) {
 	atoms := strings.Split(s, " ")
 	from, to := atoms[0], atoms[2]
 	distance, _ := strconv.ParseInt(atoms[4], 10, 32)
