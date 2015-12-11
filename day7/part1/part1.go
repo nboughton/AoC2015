@@ -36,7 +36,7 @@ func main() {
 	c.readInput(f)
 
 	// Evaluate wire "a"
-	fmt.Printf("a: %v\n", c.GetSignal("a"))
+	fmt.Printf("a: %v\n", c.getSignal("a"))
 }
 
 func newCircuit() *circuit {
@@ -79,8 +79,8 @@ func (c *circuit) readInput(file *os.File) {
 }
 
 // Recursively evaluate the signal for a given wire
-func (c *circuit) GetSignal(w string) uint16 {
-	if !c.HasSignal(w) { // if a wire has no arguments then it has a signal
+func (c *circuit) getSignal(w string) uint16 {
+	if !c.hasSignal(w) { // if a wire has no arguments then it has a signal
 		// Let's cut to the chase with operation arguments and make them uints that we can pass
 		// straight to the operation
 		gateArgs := c.plan[w].gateArgs
@@ -90,10 +90,10 @@ func (c *circuit) GetSignal(w string) uint16 {
 		for i := 0; i < len(gateArgs); i++ {
 			arg := gateArgs[i]           // let's make this easier to read
 			if !isInt.MatchString(arg) { // if the arg is not a number it's a wire
-				if !c.HasSignal(arg) { // if it has no signal we should get one
-					c.SetSignal(arg, c.GetSignal(arg))
+				if !c.hasSignal(arg) { // if it has no signal we should get one
+					c.setSignal(arg, c.getSignal(arg))
 					opArgs[i] = c.plan[arg].sig
-				} else if c.HasSignal(arg) { // if it has a signal we should give it to the opArgs
+				} else if c.hasSignal(arg) { // if it has a signal we should give it to the opArgs
 					opArgs[i] = c.plan[arg].sig
 				}
 			} else { // otherwise it's just a number so give it to the opArgs
@@ -104,17 +104,17 @@ func (c *circuit) GetSignal(w string) uint16 {
 
 		// Perform the operation now that all requirements are satisfied and clear the gateArgs
 		// to indicate that this wire is complete.
-		c.SetSignal(w, c.PerformOperation(w, opArgs))
+		c.setSignal(w, c.performOperation(w, opArgs))
 	}
 	return c.plan[w].sig
 }
 
-func (c *circuit) SetSignal(w string, val uint16) {
+func (c *circuit) setSignal(w string, val uint16) {
 	c.plan[w].sig = val
 	c.plan[w].gateArgs = nil
 }
 
-func (c *circuit) PerformOperation(w string, args []uint16) uint16 {
+func (c *circuit) performOperation(w string, args []uint16) uint16 {
 	var result uint16
 	switch c.plan[w].op {
 	case "AND":
@@ -133,7 +133,7 @@ func (c *circuit) PerformOperation(w string, args []uint16) uint16 {
 	return result
 }
 
-func (c *circuit) HasSignal(w string) bool {
+func (c *circuit) hasSignal(w string) bool {
 	if len(c.plan[w].gateArgs) == 0 {
 		return true
 	}
