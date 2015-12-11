@@ -12,7 +12,6 @@ import (
 	"strings"
 )
 
-var mostOps = regexp.MustCompile(`(AND|OR|RSHIFT|LSHIFT)`)
 var isInt = regexp.MustCompile(`^[0-9]+$`)
 
 type Wire struct {
@@ -53,24 +52,25 @@ func (c *Circuit) ReadInput(file *os.File) {
 		w := new(Wire)
 
 		// Get wire id and operation
-		l := strings.Split(s.Text(), "->")
-		op, id := strings.TrimSpace(l[0]), strings.TrimSpace(l[1])
+		atoms := strings.Split(s.Text(), "->")
+		op, id := strings.TrimSpace(atoms[0]), strings.TrimSpace(atoms[1])
 
 		// break down operation into components
-		l = strings.Split(op, " ")
-		if mostOps.MatchString(op) { // If the operation is AND, OR, LSHIFT, RSHIFT
-			w.op = l[1]
-			w.gateArgs = append(w.gateArgs, l[0], l[2])
-		} else if len(l) == 1 { // This is a direct assignment to a wire
-			if isInt.MatchString(l[0]) { // if it's an integer assign it straight to its signal
-				v, _ := strconv.ParseInt(l[0], 10, 16) // Convert value to uint16
+		atoms = strings.Split(op, " ")
+		switch len(atoms) {
+		case 1: // Direct Assignment
+			if isInt.MatchString(atoms[0]) { // if it's an integer assign it straight to its signal
+				v, _ := strconv.ParseInt(atoms[0], 10, 16) // Convert value to uint16
 				w.sig = uint16(v)
 			} else { // Other wise assign to the arguments so it can be evaluated later
-				w.gateArgs = append(w.gateArgs, l[0])
+				w.gateArgs = append(w.gateArgs, atoms[0])
 			}
-		} else { // Last possible option is that it's a NOT operation
-			w.op = l[0]
-			w.gateArgs = append(w.gateArgs, l[1])
+		case 2: // NOT operation
+			w.op = atoms[0]
+			w.gateArgs = append(w.gateArgs, atoms[1])
+		case 3: // AND, OR, LSHIFT or RSHIFT operation
+			w.op = atoms[1]
+			w.gateArgs = append(w.gateArgs, atoms[0], atoms[2])
 		}
 
 		// Assign the parsed wire to the circuit plan
@@ -81,24 +81,18 @@ func (c *Circuit) ReadInput(file *os.File) {
 // Recursively evaluate the signal for a given wire
 func (c *Circuit) GetSignal(wire string) uint16 {
 	if !c.HasSignal(wire) { // if a wire has no arguments then it has a signal
-		gateArgs := c.plan[wire].gateArgs
-		//fmt.Printf("\n-->%v [%v, %v]\n", wire, gateArgs, c.plan[wire].op)
-
 		// Let's cut to the chase with operation arguments and make them uints that we can pass
 		// straight to the operation
+		gateArgs := c.plan[wire].gateArgs
 		opArgs := make([]uint16, len(gateArgs), len(gateArgs))
 
 		// evaluate each argument and see if it has a signal
 		for i := 0; i < len(gateArgs); i++ {
-			arg := gateArgs[i] // let's make this easier to read
-			//fmt.Printf("?%v\n", arg)
-
+			arg := gateArgs[i]           // let's make this easier to read
 			if !isInt.MatchString(arg) { // if the arg is not a number it's a wire
 				if !c.HasSignal(arg) { // if it has no signal we should get one
 					c.SetSignal(arg, c.GetSignal(arg))
 					opArgs[i] = c.plan[arg].sig
-
-					//fmt.Printf("%v = %v\n", arg, c.plan[arg].sig)
 				} else if c.HasSignal(arg) { // if it has a signal we should give it to the opArgs
 					opArgs[i] = c.plan[arg].sig
 				}
@@ -110,14 +104,14 @@ func (c *Circuit) GetSignal(wire string) uint16 {
 
 		// Perform the operation now that all requirements are satisfied and clear the gateArgs
 		// to indicate that this wire is complete.
-		c.plan[wire].sig = c.PerformOperation(wire, opArgs)
-		c.plan[wire].gateArgs = nil
+		c.SetSignal(wire, c.PerformOperation(wire, opArgs))
 	}
 	return c.plan[wire].sig
 }
 
 func (c *Circuit) SetSignal(wire string, val uint16) {
 	c.plan[wire].sig = val
+	c.plan[wire].gateArgs = nil
 }
 
 func (c *Circuit) PerformOperation(wire string, args []uint16) uint16 {
