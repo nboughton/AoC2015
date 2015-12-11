@@ -120,9 +120,9 @@ func (c *circuit) getSignal(w string) uint16 {
 			}
 		}
 
-		// Perform the operation now that all requirements are satisfied and clear the gateArgs
+		// perform the operation now that all requirements are satisfied and clear the gateArgs
 		// to indicate that this wire is complete.
-		c.setSignal(w, c.PerformOperation(w, opArgs))
+		c.setSignal(w, c.performOperation(w, opArgs))
 	}
 	return c.plan[w].sig
 }
@@ -132,7 +132,7 @@ func (c *circuit) setSignal(w string, val uint16) {
 	c.plan[w].gateArgs = nil
 }
 
-func (c *circuit) PerformOperation(w string, args []uint16) uint16 {
+func (c *circuit) performOperation(w string, args []uint16) uint16 {
 	var result uint16
 	switch c.plan[w].op {
 	case "AND":
