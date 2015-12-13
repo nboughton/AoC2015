@@ -8,44 +8,80 @@ import (
 	"strings"
 )
 
+type place struct {
+	name     string
+	connects map[string]int
+}
+
+type node struct {
+	name, path string
+	connects   map[string]*node
+}
+
 func main() {
 	f, _ := os.Open(os.Args[1])
 	defer f.Close()
 
 	s := bufio.NewScanner(f)
 
-	distances := make(map[string]map[string]int)
-	places := []string{}
+	places := make(map[string]*place)
+
 	for s.Scan() {
-		from, to, distance := parseLine(s.Text())
+		n, distance := parseLine(s.Text())
 
-		_, ok := distances[from]
-		if !ok {
-			distances[from] = make(map[string]int)
+		for i := 0; i < len(n); i++ {
+			_, ok := places[n[i]]
+			if !ok {
+				places[n[i]] = new(place)
+				places[n[i]].connects = make(map[string]int)
+			}
 		}
-
-		distances[from][to] = distance
+		places[n[0]].connects[n[1]] = distance
+		places[n[1]].connects[n[0]] = distance
 	}
 
-	fmt.Printf("places %v\n")
+	//distance := 0
+	n := make(map[string]*node)
+	for a := range places {
+		fmt.Printf("Node 1: %v\n", a)
+		n[a] = newNode(a, a)
+		n[a].addNodes(places)
+	}
+
+	fmt.Printf("places %v\n", n)
 }
 
-func addPlace(p string, places *[]string) {
-	for i := 0; i < len(*places); i++ {
+func newNode(name, path string) *node {
+	n := new(node)
+	n.connects = make(map[string]*node)
+	n.name = name
+	n.path += path + " "
 
+	fmt.Printf("Node: %v\n", n)
+	return n
+}
+
+func (n *node) addNodes(places map[string]*place) {
+	fmt.Printf("Name: %v\n", n.name)
+	for place := range places {
+		if !strings.Contains(n.path, place) {
+			_, ok := n.connects[place]
+			if !ok {
+				fmt.Printf("Connect new node: %v\n", place)
+				n.connects[place] = newNode(place, place)
+			}
+
+			n.path += place + " "
+			n.connects[place].addNodes(places)
+			fmt.Printf("Path: %v\n\n", n.path)
+		}
 	}
 }
 
-func tryPath(start, end string, d map[string]map[string]int) int {
-	//path := start
-
-	return 0
-}
-
-func parseLine(s string) (string, string, int) {
+func parseLine(s string) ([]string, int) {
 	atoms := strings.Split(s, " ")
-	from, to := atoms[0], atoms[2]
+	places := []string{atoms[0], atoms[2]}
 	distance, _ := strconv.ParseInt(atoms[4], 10, 32)
 
-	return from, to, int(distance)
+	return places, int(distance)
 }
