@@ -16,6 +16,7 @@ type place struct {
 type node struct {
 	name, path string
 	connects   map[string]*node
+	distance   int
 }
 
 func main() {
@@ -43,7 +44,6 @@ func main() {
 	//distance := 0
 	n := make(map[string]*node)
 	for a := range places {
-		fmt.Printf("Node 1: %v\n", a)
 		n[a] = newNode(a, a)
 		n[a].addNodes(places)
 	}
@@ -55,25 +55,27 @@ func newNode(name, path string) *node {
 	n := new(node)
 	n.connects = make(map[string]*node)
 	n.name = name
-	n.path += path + " "
+	n.path += path
 
-	fmt.Printf("Node: %v\n", n)
 	return n
 }
 
+func (n *node) incrementPath(path string) {
+	n.path += path
+}
+
 func (n *node) addNodes(places map[string]*place) {
-	fmt.Printf("Name: %v\n", n.name)
 	for place := range places {
 		if !strings.Contains(n.path, place) {
 			_, ok := n.connects[place]
 			if !ok {
-				fmt.Printf("Connect new node: %v\n", place)
-				n.connects[place] = newNode(place, place)
+				n.connects[place] = newNode(place, n.path)
 			}
 
-			n.path += place + " "
+			n.incrementPath(place)
+			n.connects[place].incrementPath(place)
+
 			n.connects[place].addNodes(places)
-			fmt.Printf("Path: %v\n\n", n.path)
 		}
 	}
 }
