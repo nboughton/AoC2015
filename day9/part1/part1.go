@@ -41,27 +41,26 @@ func main() {
 		places[n[1]].connects[n[0]] = distance
 	}
 
-	//distance := 0
 	n := make(map[string]*node)
 	for a := range places {
 		n[a] = newNode(a, a)
 		n[a].addNodes(places)
 	}
 
-	fmt.Printf("places %v\n", n)
+	fmt.Printf("places %v\n", n["Tambi"])
 }
 
 func newNode(name, path string) *node {
 	n := new(node)
 	n.connects = make(map[string]*node)
 	n.name = name
-	n.path += path
+	n.incrementPath(path)
 
 	return n
 }
 
 func (n *node) incrementPath(path string) {
-	n.path += path
+	n.path += path + " "
 }
 
 func (n *node) addNodes(places map[string]*place) {
@@ -74,8 +73,14 @@ func (n *node) addNodes(places map[string]*place) {
 
 			n.incrementPath(place)
 			n.connects[place].incrementPath(place)
-
 			n.connects[place].addNodes(places)
+
+			p := strings.Split(n.connects[place].path, " ")
+			if len(p) == len(places) {
+				fmt.Printf("Path: %v\n", n.connects[place].path)
+			}
+			fmt.Printf("len(places): %v, len(p): %v\n", len(places), len(p))
+			//n.connects[place].distance += places[n.name][place]
 		}
 	}
 }
