@@ -49,10 +49,9 @@ func main() {
 		places[n[1]].to[n[0]] = distance
 	}
 
-	n := make(map[string]*node)
 	for a := range places {
-		n[a] = newNode(a, a)
-		n[a].addNodes()
+		n := newNode(a, a)
+		n.addNodes()
 	}
 
 	fmt.Printf("Shortest route: %v, distance: %v\n", shortest.path, shortest.distance)
