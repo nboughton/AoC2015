@@ -9,23 +9,30 @@ import (
 )
 
 type place struct {
-	name     string
-	connects map[string]int
+	name string
+	to   map[string]int
 }
 
 type node struct {
 	name, path string
 	connects   map[string]*node
-	distance   int
 }
+
+// places is a global reference for nodes and distances between nodes
+var places = make(map[string]*place)
+
+type route struct {
+	distance int
+	path     string
+}
+
+var r = &route{distance: 1000}
 
 func main() {
 	f, _ := os.Open(os.Args[1])
 	defer f.Close()
 
 	s := bufio.NewScanner(f)
-
-	places := make(map[string]*place)
 
 	for s.Scan() {
 		n, distance := parseLine(s.Text())
@@ -34,20 +41,20 @@ func main() {
 			_, ok := places[n[i]]
 			if !ok {
 				places[n[i]] = new(place)
-				places[n[i]].connects = make(map[string]int)
+				places[n[i]].to = make(map[string]int)
 			}
 		}
-		places[n[0]].connects[n[1]] = distance
-		places[n[1]].connects[n[0]] = distance
+		places[n[0]].to[n[1]] = distance
+		places[n[1]].to[n[0]] = distance
 	}
 
 	n := make(map[string]*node)
 	for a := range places {
 		n[a] = newNode(a, a)
-		n[a].addNodes(places)
+		n[a].addNodes()
 	}
 
-	fmt.Printf("places %v\n", n["Tambi"])
+	fmt.Printf("Shortest route: %v, distance: %v\n", r.path, r.distance)
 }
 
 func newNode(name, path string) *node {
@@ -61,9 +68,11 @@ func newNode(name, path string) *node {
 
 func (n *node) incrementPath(path string) {
 	n.path += path + " "
+	n.path = strings.Replace(n.path, "  ", " ", -1)
 }
 
-func (n *node) addNodes(places map[string]*place) {
+func (n *node) addNodes() {
+	nodesAdded := 0
 	for place := range places {
 		if !strings.Contains(n.path, place) {
 			_, ok := n.connects[place]
@@ -71,18 +80,27 @@ func (n *node) addNodes(places map[string]*place) {
 				n.connects[place] = newNode(place, n.path)
 			}
 
-			n.incrementPath(place)
 			n.connects[place].incrementPath(place)
-			n.connects[place].addNodes(places)
-
-			p := strings.Split(n.connects[place].path, " ")
-			if len(p) == len(places) {
-				fmt.Printf("Path: %v\n", n.connects[place].path)
-			}
-			fmt.Printf("len(places): %v, len(p): %v\n", len(places), len(p))
-			//n.connects[place].distance += places[n.name][place]
+			n.connects[place].addNodes()
+			nodesAdded++
 		}
 	}
+
+	if nodesAdded == 0 && n.getDistance() < r.distance {
+		r.path = n.path
+		r.distance = n.getDistance()
+	}
+}
+
+func (n *node) getDistance() int {
+	p := strings.Split(n.path, " ")
+	d := 0
+	for i := 0; i < len(p); i++ {
+		if i+1 < len(p) {
+			d += places[p[i]].to[p[i+1]]
+		}
+	}
+	return d
 }
 
 func parseLine(s string) ([]string, int) {
