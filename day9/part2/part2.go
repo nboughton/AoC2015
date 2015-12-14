@@ -26,7 +26,8 @@ type route struct {
 	path     string
 }
 
-var r = &route{distance: 1000}
+var longest = &route{distance: 0}
+var shortest = &route{distance: 1000}
 
 func main() {
 	f, _ := os.Open(os.Args[1])
@@ -54,7 +55,8 @@ func main() {
 		n[a].addNodes()
 	}
 
-	fmt.Printf("Shortest route: %v, distance: %v\n", r.path, r.distance)
+	fmt.Printf("Shortest route: %v, distance: %v\n", shortest.path, shortest.distance)
+	fmt.Printf("Longest route: %v, distance: %v\n", longest.path, longest.distance)
 }
 
 func newNode(name, path string) *node {
@@ -86,9 +88,14 @@ func (n *node) addNodes() {
 		}
 	}
 
-	if nodesAdded == 0 && n.getDistance() < r.distance {
-		r.path = n.path
-		r.distance = n.getDistance()
+	if nodesAdded == 0 {
+		if n.getDistance() < shortest.distance {
+			shortest.path = n.path
+			shortest.distance = n.getDistance()
+		} else if n.getDistance() > longest.distance {
+			longest.path = n.path
+			longest.distance = n.getDistance()
+		}
 	}
 }
 
