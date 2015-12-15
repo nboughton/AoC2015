@@ -3,10 +3,9 @@ package main
 import (
 	"fmt"
 	"strconv"
-	"strings"
 )
 
-var input = "1113222113"
+var input = []byte("1113222113")
 
 func main() {
 	output := input
@@ -16,24 +15,26 @@ func main() {
 	}
 }
 
-func lookAndSay(s string) string {
-	o := ""
-	a := strings.Split(s, "")
+func lookAndSay(s []byte) []byte {
+	o := []byte{}
 	c := 1
-	for i := 0; i < len(a); i++ {
-		if i+1 < len(a) {
-			if a[i] == a[i+1] {
+	for i := 0; i < len(s); i++ {
+		if i+1 < len(s) {
+			if s[i] == s[i+1] {
 				c++
 			} else {
-				o += strconv.FormatInt(int64(c), 10) + a[i]
+				b := []byte(strconv.FormatInt(int64(c), 10))
+				o = append(o, b[0], s[i])
 				c = 1
 			}
 		} else {
-			if a[i] == a[i-1] {
-				o += strconv.FormatInt(int64(c), 10) + a[i]
+			if s[i] == s[i-1] {
+				b := []byte(strconv.FormatInt(int64(c), 10))
+				o = append(o, b[0], s[i])
 			} else {
+				b := []byte(strconv.FormatInt(int64(c), 10))
 				c = 1
-				o += strconv.FormatInt(int64(c), 10) + a[i]
+				o = append(o, b[0], s[i])
 			}
 		}
 	}
