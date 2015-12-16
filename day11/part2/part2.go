@@ -39,14 +39,12 @@ func getNextPassword(s []byte) []byte {
 
 func secDoubleLetters(s []byte) bool {
 	d := []int{}
-	for i := 0; i < len(s); i++ {
-		if i+1 < len(s) {
-			t := []int{atoi[s[i]], atoi[s[i+1]]}
-			if t[0] == t[1] {
-				d = append(d, t[0])
-				if len(d) == 2 && d[0] != d[1] {
-					return true
-				}
+	for i := 0; i < len(s)-1; i++ {
+		t := []int{atoi[s[i]], atoi[s[i+1]]}
+		if t[0] == t[1] {
+			d = append(d, t[0])
+			if len(d) == 2 && d[0] != d[1] {
+				return true
 			}
 		}
 	}
@@ -54,17 +52,13 @@ func secDoubleLetters(s []byte) bool {
 }
 
 func secThreeAscending(s []byte) bool {
-	for i := 0; i < len(s); i++ {
-		if i+2 < len(s) {
-			t1 := []int{atoi[s[i]], atoi[s[i+1]], atoi[s[i+2]]} // a, b, c
-			t2 := []int{}
-			for j := 0; j < len(abc); j++ {
-				if j+2 < len(abc) {
-					t2 = []int{atoi[abc[j]], atoi[abc[j+1]], atoi[abc[j+2]]} // a, b, c -> b, c, d
-					if reflect.DeepEqual(t1, t2) {
-						return true
-					}
-				}
+	for i := 0; i < len(s)-2; i++ {
+		t1 := []int{atoi[s[i]], atoi[s[i+1]], atoi[s[i+2]]} // a, b, c
+		t2 := []int{}
+		for j := 0; j < len(abc)-2; j++ {
+			t2 = []int{atoi[abc[j]], atoi[abc[j+1]], atoi[abc[j+2]]} // a, b, c -> b, c, d
+			if reflect.DeepEqual(t1, t2) {
+				return true
 			}
 		}
 	}
