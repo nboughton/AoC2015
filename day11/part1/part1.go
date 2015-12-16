@@ -45,7 +45,6 @@ func secDoubleLetters(s []byte) bool {
 				d = append(d, t[0])
 				if len(d) == 2 && d[0] != d[1] {
 					return true
-					break
 				}
 			}
 		}
@@ -63,7 +62,6 @@ func secThreeAscending(s []byte) bool {
 					t2 = []int{atoi[abc[j]], atoi[abc[j+1]], atoi[abc[j+2]]} // a, b, c -> b, c, d
 					if reflect.DeepEqual(t1, t2) {
 						return true
-						break
 					}
 				}
 			}
