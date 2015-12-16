@@ -27,7 +27,6 @@ func main() {
 func getNextPassword(s []byte) []byte {
 	for true {
 		s = incrementPassword(s, len(s)-1)
-		//fmt.Printf("Testing %v\n", string(s))
 		if secDoubleLetters(s) && secThreeAscending(s) && !cannotContain.Match(s) {
 			fmt.Printf("Found %v\n", string(s))
 			break
@@ -67,12 +66,10 @@ func secThreeAscending(s []byte) bool {
 // increments the letter and returns true/false if it wraps
 func incrementLetter(l byte) (byte, bool) {
 	i := atoi[l]
-	w := false
 	if i+1 > len(abc) {
-		w = true
-		return itoa[1], w
+		return itoa[1], true
 	}
-	return itoa[i+1], w
+	return itoa[i+1], false
 }
 
 func incrementPassword(b []byte, i int) []byte {
