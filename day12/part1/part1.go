@@ -2,13 +2,12 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"os"
-	"regexp"
-	"strconv"
 )
 
-var isInt = regexp.MustCompile(`([-0-9]+)`)
+var total float64
 
 func main() {
 	f, _ := os.Open(os.Args[1])
@@ -16,14 +15,39 @@ func main() {
 
 	s := bufio.NewScanner(f)
 
-	sum := 0
+	var j interface{} // stuff goes in here
 	for s.Scan() {
-		line := s.Text()
-		n := isInt.FindAllString(line, -1)
-		for i := 0; i < len(n); i++ {
-			num, _ := strconv.Atoi(n[i])
-			sum += num
+		json.Unmarshal(s.Bytes(), &j)
+	}
+	checkArr(j.([]interface{}))
+	fmt.Printf("Total: %v\n", total)
+}
+
+func checkArr(m []interface{}) {
+	for _, v := range m {
+		switch vv := v.(type) {
+		case []interface{}:
+			checkArr(vv)
+		case map[string]interface{}:
+			checkObj(vv)
+		case float64:
+			total += vv
 		}
 	}
-	fmt.Printf("%v\n", sum)
+}
+
+func checkObj(m map[string]interface{}) {
+	children := []interface{}{}
+
+	for _, v := range m {
+		switch vv := v.(type) {
+		case map[string]interface{}: // new obj
+			children = append(children, vv)
+		case []interface{}: // array
+			children = append(children, vv)
+		case float64:
+			total += vv
+		}
+	}
+	checkArr(children)
 }
