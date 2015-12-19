@@ -17,7 +17,7 @@ type ingredient struct {
 }
 
 type cookie struct {
-	capacity, durability, flavour, texture, calories int
+	capacity, durability, flavour, texture, calories, score int
 }
 
 var stock []*ingredient
@@ -50,22 +50,24 @@ func makeCookies(ts, i int, m []int) {
 			makeCookies(ts, i+1, m)
 		}
 		if getTotal(m) == 100 {
-			s := getScore(m)
-			if s > winner {
-				winner = s
+			c := getScore(m)
+			if c.score > winner && c.calories == 500 {
+				winner = c.score
 			}
 		}
 	}
 }
 
-func getScore(m []int) int {
+func getScore(m []int) *cookie {
 	c := new(cookie)
 	for i := 0; i < len(m); i++ {
 		c.capacity += stock[i].capacity * m[i]
 		c.durability += stock[i].durability * m[i]
 		c.flavour += stock[i].flavour * m[i]
 		c.texture += stock[i].texture * m[i]
+		c.calories += stock[i].calories * m[i]
 	}
+
 	if c.capacity < 0 {
 		c.capacity = 0
 	}
@@ -78,7 +80,12 @@ func getScore(m []int) int {
 	if c.texture < 0 {
 		c.texture = 0
 	}
-	return c.capacity * c.durability * c.flavour * c.texture
+	if c.calories < 0 {
+		c.calories = 0
+	}
+
+	c.score = c.capacity * c.durability * c.flavour * c.texture
+	return c
 }
 
 func getTotal(m []int) int {
