@@ -66,8 +66,8 @@ func newNode(name, path string) *node {
 }
 
 func (n *node) incrementPath(path string) {
-	n.path += path + " "
-	n.path = strings.Replace(n.path, "  ", " ", -1)
+	n.path += " " + path + " "
+	n.path = strings.TrimSpace(n.path)
 }
 
 func (n *node) addNodes() {
