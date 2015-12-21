@@ -87,7 +87,12 @@ func (s *node) addContainers() {
 }
 
 func (s *node) addSet() {
-	sm := s.path
+	sm := ""
+	for _, v := range s.idsToSet() {
+		sm += strconv.Itoa(v) + " "
+	}
+	sm = strings.TrimSpace(sm)
+
 	if winningSets[sm] != 1 {
 		winningSets[sm] = 1
 		total++
@@ -102,6 +107,7 @@ func (s *node) idsToSet() []int {
 	for _, v := range p {
 		st = append(st, cById[v])
 	}
+	sort.Ints(st)
 	return st
 }
 
