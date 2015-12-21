@@ -10,6 +10,7 @@ import (
 )
 
 var containerSets = make(map[int]int)
+var uniqueSets []*set
 var foundSets []set
 
 var containers []int
@@ -17,7 +18,7 @@ var capacity = 150
 var total = 0
 
 type node struct {
-	path  set
+	path  *set
 	nodes map[int]*node
 }
 
@@ -40,10 +41,10 @@ func main() {
 		newNode(newSet(c)).addContainers()
 	}
 
-	fmt.Printf("Total permutations: %v\n", len(foundSets))
+	fmt.Printf("Total permutations: %v\n", len(uniqueSets))
 }
 
-func newNode(path set) *node {
+func newNode(path *set) *node {
 	s := new(node)
 	s.nodes = make(map[int]*node)
 	s.path = newSet()
@@ -52,24 +53,24 @@ func newNode(path set) *node {
 	return s
 }
 
-func newSet(p ...int) set {
+func newSet(p ...int) *set {
 	s := make(set)
 
 	for i := 0; i < len(p); i++ {
 		s[p[i]]++
 	}
 
-	return s
+	return &s
 }
 
-func (s *node) incrementPath(path set) {
-	for k, v := range path {
-		s.path[k] += v
+func (s *node) incrementPath(path *set) {
+	for k, v := range *path {
+		(*s.path)[k] += v
 	}
 }
 
 func (s *node) addContainers() {
-	for i, container := range containers {
+	for _, container := range containers {
 		if s.checkSet(container) && s.getTotal()+container <= capacity {
 			_, ok := s.nodes[container]
 			if !ok {
@@ -77,11 +78,11 @@ func (s *node) addContainers() {
 			}
 
 			s.nodes[container].incrementPath(newSet(container))
-			if i+1 < len(containers) {
-				if s.nodes[container].checkSet(containers[i+1]) {
-					s.nodes[container].addContainers()
-				}
-
+			if s.nodes[container].checkSet() {
+				//fmt.Printf("p: %v\n", s.path)
+				s.nodes[container].addContainers()
+			} else {
+				delete(s.nodes, container)
 			}
 		}
 	}
@@ -94,7 +95,7 @@ func (s *node) addContainers() {
 func (s *node) addSet() {
 	found := false
 
-	for _, v := range foundSets {
+	for _, v := range uniqueSets {
 		if reflect.DeepEqual(s.path, v) {
 			found = true
 		}
@@ -103,7 +104,7 @@ func (s *node) addSet() {
 	if !found {
 		total++
 		fmt.Printf("set %v found: %v\n", total, s.path)
-		foundSets = append(foundSets, s.path)
+		uniqueSets = append(uniqueSets, s.path)
 	}
 }
 
@@ -113,7 +114,7 @@ func (s *node) checkSet(t ...int) bool {
 		control[t[0]]++
 	}
 
-	for k, v := range s.path {
+	for k, v := range *s.path {
 		control[k] = v
 	}
 
@@ -129,7 +130,7 @@ func (s *node) checkSet(t ...int) bool {
 func (s *node) getTotal() int {
 	total := 0
 
-	for k, v := range s.path {
+	for k, v := range *s.path {
 		total += k * v
 	}
 	return total
