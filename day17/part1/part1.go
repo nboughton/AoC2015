@@ -9,7 +9,6 @@ import (
 	"strings"
 )
 
-var containerSets = make(map[int]int)
 var cById = make(map[string]int)
 var foundSets = make(map[string]int)
 var winningSets = make(map[string]int)
@@ -23,8 +22,6 @@ type node struct {
 	nodes map[int]*node
 }
 
-type set map[int]int
-
 func main() {
 	f, _ := os.Open(os.Args[1])
 	defer f.Close()
@@ -34,7 +31,6 @@ func main() {
 	for s.Scan() {
 		v, _ := strconv.Atoi(s.Text())
 		containers = append(containers, v)
-		containerSets[v]++
 	}
 
 	sort.Ints(containers)
@@ -44,7 +40,6 @@ func main() {
 		cById[si+":"+sv] = v
 	}
 
-	//fmt.Printf("cById %v\n", cById)
 	for k, _ := range cById {
 		newNode(k).addContainers()
 	}
@@ -61,29 +56,43 @@ func newNode(path string) *node {
 }
 
 func (s *node) incrementPath(path string) {
-	//fmt.Printf("ip %v\n", path)
 	s.path += " " + path + " "
 	s.path = strings.TrimSpace(s.path)
 }
 
 func (s *node) addContainers() {
-	nodesAdded := 0
 	for id, container := range cById {
-		if !strings.Contains(s.path, id) && s.getTotal()+container <= capacity {
+		if !strings.Contains(s.path, id) && s.getTotal()+container < capacity {
 			_, ok := s.nodes[container]
 			if !ok {
 				s.nodes[container] = newNode(s.path)
 			}
 
 			s.nodes[container].incrementPath(id)
-			s.nodes[container].addContainers()
-			nodesAdded++
+			if s.nodes[container].validSet() {
+				s.nodes[container].addContainers()
+			} else {
+				delete(s.nodes, container)
+			}
+		}
+	}
+	if s.validSet() && s.getTotal() == capacity {
+		s.addSet()
+	}
+}
+
+func (s *node) validSet() bool {
+	p := strings.Split(s.path, " ")
+
+	control := make(map[string]int)
+	for _, v := range p {
+		control[v]++
+		if control[v] > 1 {
+			return false
 		}
 	}
 
-	if nodesAdded == 0 && s.getTotal() == capacity {
-		s.addSet()
-	}
+	return true
 }
 
 func (s *node) addSet() {
@@ -96,7 +105,7 @@ func (s *node) addSet() {
 	if winningSets[sm] != 1 {
 		winningSets[sm] = 1
 		total++
-		fmt.Printf("set %v found: %v\n", total, s.idsToSet())
+		fmt.Printf("set %v found: %v\n", total, sm)
 	}
 }
 
