@@ -19,7 +19,7 @@ var capacity = 150
 var total = 0
 
 type node struct {
-	path  *set
+	path  string
 	nodes map[int]*node
 }
 
@@ -41,125 +41,75 @@ func main() {
 	for i, v := range containers {
 		si := strconv.Itoa(i)
 		sv := strconv.Itoa(v)
-		cById[sv+":"+si] = v
+		cById[si+":"+sv] = v
 	}
-	for _, c := range containers {
-		newNode(newSet(c)).addContainers()
+
+	//fmt.Printf("cById %v\n", cById)
+	for k, _ := range cById {
+		newNode(k).addContainers()
 	}
 
 	fmt.Printf("Total permutations: %v\n", len(winningSets))
 }
 
-func newNode(path *set) *node {
+func newNode(path string) *node {
 	s := new(node)
 	s.nodes = make(map[int]*node)
-	s.path = newSet()
 	s.incrementPath(path)
 
 	return s
 }
 
-func newSet(p ...int) *set {
-	s := &set{}
-
-	for i := 0; i < len(p); i++ {
-		(*s)[p[i]]++
-	}
-
-	return s
-}
-
-func (s *node) incrementPath(path *set) {
-	for k, v := range *path {
-		(*s.path)[k] += v
-	}
+func (s *node) incrementPath(path string) {
+	//fmt.Printf("ip %v\n", path)
+	s.path += " " + path + " "
+	s.path = strings.TrimSpace(s.path)
 }
 
 func (s *node) addContainers() {
-	for _, container := range containers {
-		//if uniqueSet(s.path) && s.checkSet(container) && s.getTotal()+container <= capacity {
-
-		if uniqueSet(s.path) && s.checkSet(container) && s.getTotal()+container <= capacity {
+	nodesAdded := 0
+	for id, container := range cById {
+		if !strings.Contains(s.path, id) && s.getTotal()+container <= capacity {
 			_, ok := s.nodes[container]
 			if !ok {
 				s.nodes[container] = newNode(s.path)
 			}
 
-			s.nodes[container].incrementPath(newSet(container))
-			if uniqueSet(s.nodes[container].path) {
-				s.nodes[container].addContainers()
-			} else {
-				delete(s.nodes, container)
-			}
-		} else if s.checkSet() && s.getTotal() == capacity {
-			s.addSet()
+			s.nodes[container].incrementPath(id)
+			s.nodes[container].addContainers()
+			nodesAdded++
 		}
+	}
+
+	if nodesAdded == 0 && s.getTotal() == capacity {
+		s.addSet()
 	}
 }
 
 func (s *node) addSet() {
-	sm := setMap(s.path)
+	sm := s.path
 	if winningSets[sm] != 1 {
 		winningSets[sm] = 1
 		total++
-		fmt.Printf("set %v found: %v\n", total, sm)
+		fmt.Printf("set %v found: %v\n", total, s.idsToSet())
 	}
 }
 
-func (s *node) checkSet(t ...int) bool {
-	control := newSet()
-	if len(t) > 0 {
-		(*control)[t[0]]++
-	}
+func (s *node) idsToSet() []int {
+	st := []int{}
+	p := strings.Split(s.path, " ")
 
-	for k, v := range *s.path {
-		(*control)[k] = v
+	for _, v := range p {
+		st = append(st, cById[v])
 	}
-
-	for k, _ := range *control {
-		if (*control)[k] > containerSets[k] {
-			return false
-		}
-	}
-
-	if !uniqueSet(control) {
-		return false
-	}
-
-	return true
-}
-
-func setMap(sm *set) string {
-	s := ""
-	im := []int{}
-	for k, v := range *sm {
-		for i := 0; i < v; i++ {
-			im = append(im, k)
-		}
-	}
-	sort.Ints(im)
-	for i := 0; i < len(im); i++ {
-		s += strconv.Itoa(im[i]) + " "
-	}
-
-	s = strings.TrimSpace(s)
-	return s
-}
-
-func uniqueSet(s *set) bool {
-	sm := setMap(s)
-	if foundSets[sm] != 1 {
-		foundSets[sm] = 1
-		return false
-	}
-	return true
+	return st
 }
 
 func (s *node) getTotal() int {
 	total := 0
-
-	for k, v := range *s.path {
-		total += k * v
+	p := strings.Split(s.path, " ")
+	for _, v := range p {
+		total += cById[v]
 	}
 	return total
 }

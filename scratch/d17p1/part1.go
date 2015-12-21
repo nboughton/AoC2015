@@ -67,6 +67,7 @@ func (s *node) incrementPath(path string) {
 }
 
 func (s *node) addContainers() {
+	nodesAdded := 0
 	for id, container := range cById {
 		if !strings.Contains(s.path, id) && s.getTotal()+container <= capacity {
 			_, ok := s.nodes[container]
@@ -76,11 +77,12 @@ func (s *node) addContainers() {
 
 			s.nodes[container].incrementPath(id)
 			s.nodes[container].addContainers()
+			nodesAdded++
 		}
+	}
 
-		if s.getTotal() == capacity {
-			s.addSet()
-		}
+	if nodesAdded == 0 && s.getTotal() == capacity {
+		s.addSet()
 	}
 }
 
