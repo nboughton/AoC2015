@@ -71,18 +71,20 @@ func (s *node) incrementPath(path *set) {
 
 func (s *node) addContainers() {
 	for _, container := range containers {
-		if s.checkSet() && s.checkSet(container) && s.getTotal()+container <= capacity {
+		if uniqueSet(s.path) && s.checkSet(container) && s.getTotal()+container <= capacity {
 			_, ok := s.nodes[container]
 			if !ok {
 				s.nodes[container] = newNode(s.path)
 			}
 
 			s.nodes[container].incrementPath(newSet(container))
-			s.nodes[container].addContainers()
+			if uniqueSet(s.nodes[container].path) {
+				s.nodes[container].addContainers()
+			} else {
+				delete(s.nodes, container)
+			}
 		} else if s.checkSet() && s.getTotal() == capacity {
 			s.addSet()
-		} else {
-			delete(s.nodes, container)
 		}
 	}
 }
