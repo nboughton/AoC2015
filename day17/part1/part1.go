@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"reflect"
+	"sort"
 	"strconv"
 )
 
@@ -34,6 +35,7 @@ func main() {
 		containerSets[v]++
 	}
 
+	sort.Ints(containers)
 	for _, c := range containers {
 		newNode(newSet(c)).addContainers()
 	}
@@ -68,14 +70,16 @@ func (s *node) incrementPath(path set) {
 
 func (s *node) addContainers() {
 	for _, container := range containers {
-		if s.checkSet(container) && s.getTotal() < capacity {
+		if s.checkSet(container) && s.getTotal()+container <= capacity {
 			_, ok := s.nodes[container]
 			if !ok {
 				s.nodes[container] = newNode(s.path)
 			}
 
 			s.nodes[container].incrementPath(newSet(container))
-			s.nodes[container].addContainers()
+			if s.nodes[container].checkSet() {
+				s.nodes[container].addContainers()
+			}
 		}
 	}
 
@@ -94,7 +98,8 @@ func (s *node) addSet() {
 	}
 
 	if !found {
-		fmt.Printf("New set found: %v\n", s.path)
+		total++
+		fmt.Printf("set %v found: %v\n", total, s.path)
 		foundSets = append(foundSets, s.path)
 	}
 }
