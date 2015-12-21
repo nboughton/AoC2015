@@ -10,8 +10,8 @@ import (
 )
 
 var containerSets = make(map[int]int)
-var uniqueSets []*set
-var foundSets []set
+var winningSets []*set
+var foundSets []*set
 
 var containers []int
 var capacity = 150
@@ -41,7 +41,7 @@ func main() {
 		newNode(newSet(c)).addContainers()
 	}
 
-	fmt.Printf("Total permutations: %v\n", len(uniqueSets))
+	fmt.Printf("Total permutations: %v\n", len(winningSets))
 }
 
 func newNode(path *set) *node {
@@ -54,13 +54,13 @@ func newNode(path *set) *node {
 }
 
 func newSet(p ...int) *set {
-	s := make(set)
+	s := &set{}
 
 	for i := 0; i < len(p); i++ {
-		s[p[i]]++
+		(*s)[p[i]]++
 	}
 
-	return &s
+	return s
 }
 
 func (s *node) incrementPath(path *set) {
@@ -71,6 +71,7 @@ func (s *node) incrementPath(path *set) {
 
 func (s *node) addContainers() {
 	for _, container := range containers {
+
 		if s.checkSet(container) && s.getTotal()+container <= capacity {
 			_, ok := s.nodes[container]
 			if !ok {
@@ -95,7 +96,7 @@ func (s *node) addContainers() {
 func (s *node) addSet() {
 	found := false
 
-	for _, v := range uniqueSets {
+	for _, v := range winningSets {
 		if reflect.DeepEqual(s.path, v) {
 			found = true
 		}
@@ -104,27 +105,46 @@ func (s *node) addSet() {
 	if !found {
 		total++
 		fmt.Printf("set %v found: %v\n", total, s.path)
-		uniqueSets = append(uniqueSets, s.path)
+		winningSets = append(winningSets, s.path)
 	}
 }
 
 func (s *node) checkSet(t ...int) bool {
-	control := make(map[int]int)
+	control := newSet()
 	if len(t) > 0 {
-		control[t[0]]++
+		(*control)[t[0]]++
 	}
 
 	for k, v := range *s.path {
-		control[k] = v
+		(*control)[k] = v
 	}
 
-	for k, _ := range control {
-		if control[k] > containerSets[k] {
+	for k, _ := range *control {
+		if (*control)[k] > containerSets[k] {
 			return false
 		}
 	}
 
+	uniqueSet(control)
+
 	return true
+}
+
+func uniqueSet(s *set) bool {
+	found := false
+
+	for _, v := range foundSets {
+		if reflect.DeepEqual(s, v) {
+			found = true
+		}
+	}
+
+	if !found {
+		foundSets = append(foundSets, s)
+		return true
+	}
+
+	return false
 }
 
 func (s *node) getTotal() int {
