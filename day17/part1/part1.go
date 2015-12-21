@@ -71,7 +71,6 @@ func (s *node) incrementPath(path *set) {
 
 func (s *node) addContainers() {
 	for _, container := range containers {
-
 		if s.checkSet() && s.checkSet(container) && s.getTotal()+container <= capacity {
 			_, ok := s.nodes[container]
 			if !ok {
@@ -79,15 +78,11 @@ func (s *node) addContainers() {
 			}
 
 			s.nodes[container].incrementPath(newSet(container))
-			//if s.nodes[container].checkSet() {
-			//fmt.Printf("am, cs: %v\n", setMap(s.nodes[container].path))
 			s.nodes[container].addContainers()
-			//}
-			/*else {
-				delete(s.nodes, container)
-			}*/
 		} else if s.checkSet() && s.getTotal() == capacity {
 			s.addSet()
+		} else {
+			delete(s.nodes, container)
 		}
 	}
 }
