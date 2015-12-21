@@ -10,6 +10,7 @@ import (
 )
 
 var containerSets = make(map[int]int)
+var cById = make(map[string]int)
 var foundSets = make(map[string]int)
 var winningSets = make(map[string]int)
 
@@ -37,6 +38,11 @@ func main() {
 	}
 
 	sort.Ints(containers)
+	for i, v := range containers {
+		si := strconv.Itoa(i)
+		sv := strconv.Itoa(v)
+		cById[sv+":"+si] = v
+	}
 	for _, c := range containers {
 		newNode(newSet(c)).addContainers()
 	}
@@ -71,6 +77,8 @@ func (s *node) incrementPath(path *set) {
 
 func (s *node) addContainers() {
 	for _, container := range containers {
+		//if uniqueSet(s.path) && s.checkSet(container) && s.getTotal()+container <= capacity {
+
 		if uniqueSet(s.path) && s.checkSet(container) && s.getTotal()+container <= capacity {
 			_, ok := s.nodes[container]
 			if !ok {
