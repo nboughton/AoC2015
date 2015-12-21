@@ -4,14 +4,14 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"reflect"
 	"sort"
 	"strconv"
+	"strings"
 )
 
 var containerSets = make(map[int]int)
-var winningSets []*set
-var foundSets []*set
+var foundSets = make(map[string]int)
+var winningSets = make(map[string]int)
 
 var containers []int
 var capacity = 150
@@ -80,7 +80,6 @@ func (s *node) addContainers() {
 
 			s.nodes[container].incrementPath(newSet(container))
 			if s.nodes[container].checkSet() {
-				//fmt.Printf("p: %v\n", s.path)
 				s.nodes[container].addContainers()
 			} else {
 				delete(s.nodes, container)
@@ -94,18 +93,11 @@ func (s *node) addContainers() {
 }
 
 func (s *node) addSet() {
-	found := false
-
-	for _, v := range winningSets {
-		if reflect.DeepEqual(s.path, v) {
-			found = true
-		}
-	}
-
-	if !found {
+	sm := setMap(s.path)
+	if winningSets[sm] != 1 {
+		winningSets[sm] = 1
 		total++
-		fmt.Printf("set %v found: %v\n", total, s.path)
-		winningSets = append(winningSets, s.path)
+		fmt.Printf("set %v found: %v\n", total, sm)
 	}
 }
 
@@ -125,26 +117,37 @@ func (s *node) checkSet(t ...int) bool {
 		}
 	}
 
-	uniqueSet(control)
+	if !uniqueSet(control) {
+		return false
+	}
 
 	return true
 }
 
-func uniqueSet(s *set) bool {
-	found := false
-
-	for _, v := range foundSets {
-		if reflect.DeepEqual(s, v) {
-			found = true
+func setMap(sm *set) string {
+	s := ""
+	im := []int{}
+	for k, v := range *sm {
+		for i := 0; i < v; i++ {
+			im = append(im, k)
 		}
 	}
-
-	if !found {
-		foundSets = append(foundSets, s)
-		return true
+	sort.Ints(im)
+	for i := 0; i < len(im); i++ {
+		s += strconv.Itoa(im[i]) + " "
 	}
 
-	return false
+	s = strings.TrimSpace(s)
+	return s
+}
+
+func uniqueSet(s *set) bool {
+	sm := setMap(s)
+	if foundSets[sm] != 1 {
+		foundSets[sm] = 1
+		return false
+	}
+	return true
 }
 
 func (s *node) getTotal() int {
