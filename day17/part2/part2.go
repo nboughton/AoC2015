@@ -22,13 +22,18 @@ func main() {
 		cVal = append(cVal, v)
 	}
 
+	minChk := false
 	for i := 2; i < len(cVal)-1; i++ {
 		com := itertools.Combinations(cVal, i)
 		for _, l := range com {
 			if getTotal(l) == 150 {
-				fmt.Printf("c:%v\n", l)
+				minChk = true
 				total++
+				fmt.Printf("c:%v\n", l)
 			}
+		}
+		if minChk {
+			break
 		}
 	}
 
