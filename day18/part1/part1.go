@@ -72,7 +72,6 @@ func testLight(r, c int, g lightGrid) bool {
 					continue
 				} else if g[row][col] {
 					surOn++
-				} else {
 				}
 			}
 		}
