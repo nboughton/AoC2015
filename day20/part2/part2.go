@@ -9,6 +9,7 @@ func main() {
 	var house, presents int
 
 	// houses 2,4,8,16 and all primes etc = n-1 * 2 + 10
+	// step incrememnts of 60 produce the largest change
 	for house = 0; house != -1; house += 60 {
 		presents = getsPresents(house)
 		if presents >= input {
